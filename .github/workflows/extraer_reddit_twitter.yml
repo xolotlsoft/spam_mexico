@@ -5,6 +5,9 @@ on:
     - cron: '0 8 * * *'  # Ejecutar diariamente a las 08:00 UTC
   workflow_dispatch:  # Permitir ejecución manual
 
+permissions:
+  contents: write
+
 jobs:
   extraer:
     runs-on: ubuntu-latest
@@ -19,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install tweepy praw
+          pip install tweepy praw jsonschema
 
       - name: Ejecutar script de extracción
         env:
@@ -27,100 +30,19 @@ jobs:
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
-        run: |
-          python3 -c "
-          import json
-          from datetime import datetime
-          import re
-          import os
-
-          # Simulación de extracción desde Reddit y Twitter
-          # Nota: En la realidad, esto requeriría credenciales de API
-          
-          # Ejemplo: Números simulados de Reddit
-          numeros_reddit = [
-              {'number': '+525511111111', 'reports': 1, 'tag': 'extorsion', 'source': 'Reddit'},
-              {'number': '+525522222222', 'reports': 2, 'tag': 'fraude', 'source': 'Reddit'}
-          ]
-          
-          # Ejemplo: Números simulados de Twitter
-          numeros_twitter = [
-              {'number': '+525533333333', 'reports': 1, 'tag': 'extorsion', 'source': 'Twitter'},
-              {'number': '+525544444444', 'reports': 3, 'tag': 'extorsion', 'source': 'Twitter'}
-          ]
-          
-          # Combinar números
-          numeros = numeros_reddit + numeros_twitter
-          
-          # Cargar el JSON actual
-          with open('mexico_spam_db.json', 'r') as f:
-              data = json.load(f)
-          
-          # Agregar nuevos números (evitar duplicados)
-          existing_numbers = {num['number'] for num in data['numbers']}
-          for num in numeros:
-              if num['number'] not in existing_numbers:
-                  data['numbers'].append(num)
-          
-          # Actualizar metadatos
-          data['updated_at'] = datetime.now().strftime('%Y-%m-%d')
-          data['version'] = '1.2'
-          data['description'] = 'Base de datos colaborativa de números de extorsión telefónica en México. Fuentes: MiraQuienHabla, CONDUSEF, Profeco, Reddit, Twitter, y reportes públicos.'
-          
-          # Guardar el JSON actualizado
-          with open('mexico_spam_db.json', 'w') as f:
-              json.dump(data, f, indent=2, ensure_ascii=False)
-          
-          print(f'✅ Se extrajeron {len(numeros)} números de Reddit y Twitter.')
-          "
+        run: python3 scripts/update_reddit_twitter.py
 
       - name: Validar JSON
-        run: |
-          python3 -c "
-          import json
-          from jsonschema import validate, ValidationError
-
-          # Schema esperado para OpenCallShield
-          schema = {
-              'type': 'object',
-              'properties': {
-                  'version': {'type': 'string'},
-                  'updated_at': {'type': 'string'},
-                  'description': {'type': 'string'},
-                  'numbers': {
-                      'type': 'array',
-                      'items': {
-                          'type': 'object',
-                          'properties': {
-                              'number': {'type': 'string', 'pattern': '^\+52\d{10}$'},
-                              'reports': {'type': 'integer', 'minimum': 1},
-                              'tag': {'type': 'string'},
-                              'source': {'type': 'string'}
-                          },
-                          'required': ['number', 'reports', 'tag', 'source']
-                      }
-                  }
-              },
-              'required': ['version', 'updated_at', 'description', 'numbers']
-          }
-
-          # Cargar el JSON
-          with open('mexico_spam_db.json', 'r') as f:
-              data = json.load(f)
-
-          # Validar contra el schema
-          try:
-              validate(instance=data, schema=schema)
-              print('✅ El JSON cumple con el formato esperado para OpenCallShield.')
-          except ValidationError as e:
-              print(f'❌ Error de validación: {e.message}')
-              exit(1)
-          "
+        run: python3 scripts/validate_json.py
 
       - name: Commit y Push
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add mexico_spam_db.json
+          git add mexico_spam_db.json FUENTES.md
+          if git diff --cached --quiet; then
+            echo "Sin cambios para publicar."
+            exit 0
+          fi
           git commit -m "Actualizar números de Reddit y Twitter - $(date +'%Y-%m-%d')"
           git push

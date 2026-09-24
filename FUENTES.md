@@ -98,6 +98,8 @@ Este documento describe las **fuentes confiables** utilizadas para compilar la b
      - **Validación social**: Los posts con más upvotes suelen ser confiables.
    - **Método de extracción**:
      - **API de Reddit**: Usar la API oficial o herramientas como `PRAW` (Python Reddit API Wrapper).
+     - **Filtro de confiabilidad**: Solo se consideran publicaciones con **más de 5 upvotes**. Los números se extraen del post y sus comentarios.
+     - **Normalización**: Todo número detectado se convierte al formato `+52XXXXXXXXXX` antes de evaluarlo para evitar duplicados por espacios, guiones o prefijos escritos de forma distinta.
      - **Ejemplo**:
        ```python
        import praw
@@ -115,6 +117,8 @@ Este documento describe las **fuentes confiables** utilizadas para compilar la b
      - **Validación manual**: Requiere filtrar información relevante.
    - **Método de extracción**:
      - **API de Twitter**: Usar `tweepy` para buscar tweets con palabras clave.
+     - **Filtro de confiabilidad**: Solo se consideran tweets con **más de 10 interacciones** (`likes + retweets`) y se excluyen retweets automáticos.
+     - **Normalización**: Los números extraídos se validan con el formato `+52XXXXXXXXXX` antes de intentar agregarlos al JSON.
      - **Ejemplo**:
        ```python
        import tweepy
@@ -207,6 +211,19 @@ El archivo `mexico_spam_db.json` sigue el siguiente esquema:
 
 ---
 
+## ✅ **Validación y resolución de conflictos**
+
+- **Schema obligatorio**: El workflow `validate_json.yml` valida `version`, `updated_at`, `description` y la lista `numbers`.
+- **Formato obligatorio**: Cada número debe cumplir exactamente con `+52XXXXXXXXXX`.
+- **Sin duplicados**: El número telefónico funciona como clave única dentro de `mexico_spam_db.json`.
+- **Prioridad de etiquetas**:
+  1. Se prioriza la etiqueta con más reportes acumulados.
+  2. En empate, se conserva la etiqueta respaldada por la fuente más confiable.
+- **Prioridad de fuentes**: `CONDUSEF > Profeco/Gobierno/Policía Cibernética > MiraQuienHabla > Reddit/Twitter`.
+- **Trazabilidad**: Cuando la extracción automática agrega números nuevos desde Reddit o Twitter/X, también actualiza el registro documentado al final de este archivo.
+
+---
+
 ## 📌 **Recomendaciones para Agentes**
 
 - **Automatizar**: Usar scripts en Python para extraer datos periódicamente.
@@ -234,3 +251,9 @@ Si encuentras una **nueva fuente confiable** o un **método de extracción mejor
 ---
 
 **Nota**: Este documento se actualizará periódicamente para incluir nuevas fuentes o métodos de extracción.
+
+---
+
+## 📒 Registro automatizado Reddit/Twitter
+
+Este registro resume los números añadidos por la extracción automatizada diaria desde Reddit y Twitter/X.
