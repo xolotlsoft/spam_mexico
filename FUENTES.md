@@ -16,6 +16,8 @@ Este documento describe las **fuentes confiables** utilizadas para compilar la b
    - **Método de extracción**:
      - **Web Scraping**: Se extraen los números, reportes, etiquetas y fuentes de la página de "Últimos Reportes".
      - **Automatización**: Se puede usar un script en Python con `requests` y `BeautifulSoup` para parsear los datos.
+     - **Script del repositorio**: `scripts/miraquienhabla.py`
+     - **Workflow programado**: `.github/workflows/extraer_miraquienhabla.yml`
      - **Ejemplo de script**:
        ```python
        import requests
@@ -234,3 +236,12 @@ Si encuentras una **nueva fuente confiable** o un **método de extracción mejor
 ---
 
 **Nota**: Este documento se actualizará periódicamente para incluir nuevas fuentes o métodos de extracción.
+
+---
+
+## Registro de Extracciones Automatizadas
+
+### 2026-09-24 — MiraQuienHabla
+- Fuente: MiraQuienHabla
+- Números añadidos: ninguno durante esta implementación
+- Limpieza de integridad: se eliminaron 2 números inválidos y 1 duplicado exacto para que `mexico_spam_db.json` valide contra el schema de OpenCallShield.

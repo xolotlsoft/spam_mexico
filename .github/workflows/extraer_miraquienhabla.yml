@@ -1,0 +1,63 @@
+name: Extraer números de MiraQuienHabla
+
+on:
+  schedule:
+    - cron: '0 10 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extraer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Determinar si corresponde el segundo lunes del mes
+        id: schedule_window
+        if: github.event_name == 'schedule'
+        run: |
+          day_of_month=$(date -u +%-d)
+          if [ "$day_of_month" -ge 8 ] && [ "$day_of_month" -le 14 ]; then
+            echo "run_extraction=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_extraction=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: github.event_name == 'workflow_dispatch' || steps.schedule_window.outputs.run_extraction == 'true'
+        run: |
+          pip install requests beautifulsoup4 jsonschema
+
+      - name: Ejecutar script de extracción
+        if: github.event_name == 'workflow_dispatch' || steps.schedule_window.outputs.run_extraction == 'true'
+        run: |
+          python -m scripts.miraquienhabla \
+            --db-path mexico_spam_db.json \
+            --fuentes-path FUENTES.md
+
+      - name: Validar JSON
+        if: github.event_name == 'workflow_dispatch' || steps.schedule_window.outputs.run_extraction == 'true'
+        run: |
+          python -m scripts.validate_json mexico_spam_db.json
+
+      - name: Commit y push si hay cambios
+        if: github.event_name == 'workflow_dispatch' || steps.schedule_window.outputs.run_extraction == 'true'
+        run: |
+          if git diff --quiet -- mexico_spam_db.json FUENTES.md; then
+            echo "Sin cambios que publicar."
+            exit 0
+          fi
+
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add mexico_spam_db.json FUENTES.md
+          git commit -m "Actualizar MiraQuienHabla - $(date -u +'%Y-%m-%d')"
+          git push
