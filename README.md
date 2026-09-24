@@ -9,6 +9,26 @@ El uso principal de esta base de datos es para el proyecto **[OpenCallShield](ht
 
 ---
 
+## Modo de Uso
+
+### Integración con OpenCallShield
+Para utilizar esta base de datos en **OpenCallShield**, sigue estos pasos:
+
+1. **Configuración de la URL**:
+   - Usa la siguiente URL para acceder al archivo JSON:
+     ```
+     https://raw.githubusercontent.com/xolotlsoft/spam_mexico/main/mexico_spam_db.json
+     ```
+   - Esta URL apunta directamente al contenido crudo del archivo, lo que permite que **OpenCallShield** pueda consumirlo sin problemas.
+
+2. **Validación del JSON**:
+   - El repositorio incluye un workflow de GitHub Actions que valida automáticamente el formato del archivo `mexico_spam_db.json` contra un schema esperado para **OpenCallShield**. Esto garantiza que los datos estén siempre en el formato correcto.
+
+3. **Actualización de Datos**:
+   - Si deseas actualizar los datos, puedes hacer un *Pull Request* con los cambios o reportar números adicionales a través de las fuentes mencionadas.
+
+---
+
 ## Estructura del Archivo
 El archivo `mexico_spam_db.json` contiene una lista de números telefónicos con los siguientes campos:
 - `number`: Número telefónico en formato internacional (ej. `+52XXXXXXXXXX`).
