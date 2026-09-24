@@ -1,7 +1,7 @@
 {
-  "version": "1.0",
-  "updated_at": "2026-09-23",
-  "description": "Base de datos colaborativa de números de extorsión telefónica en México. Fuente: MiraQuienHabla (https://miraquienhabla.com.mx/reportes).",
+  "version": "1.1",
+  "updated_at": "2026-09-24",
+  "description": "Base de datos colaborativa de números de extorsión telefónica en México. Fuentes: MiraQuienHabla, CONDUSEF, Profeco, y reportes públicos.",
   "numbers": [
     {"number": "+525661965523", "reports": 4, "tag": "extorsion", "source": "MiraQuienHabla"},
     {"number": "+528148564620", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
@@ -49,6 +49,9 @@
     {"number": "+525599927070", "reports": 11, "tag": "extorsion", "source": "MiraQuienHabla"},
     {"number": "+525581141414", "reports": 112, "tag": "extorsion", "source": "MiraQuienHabla"},
     {"number": "+52525668054473", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+524423341111", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"}
+    {"number": "+524423341111", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
+    {"number": "+525668054473", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
+    {"number": "+525590715590", "reports": 3, "tag": "fraude", "source": "MiraQuienHabla"},
+    {"number": "+525530002900", "reports": 6, "tag": "extorsion", "source": "MiraQuienHabla"}
   ]
 }
