@@ -1,0 +1,146 @@
+name: Monitorear Automatización
+
+on:
+  workflow_run:
+    workflows:
+      - Extraer Números de MiraQuienHabla
+      - Extraer Números de CONDUSEF y Profeco
+      - Extraer Números de Reddit y Twitter
+      - Extraer Números de Gobiernos Estatales
+      - Validate JSON for OpenCallShield
+    types:
+      - completed
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+  pull-requests: read
+
+jobs:
+  retry-or-notify:
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reintentar el workflow una vez después de 1 hora
+        if: github.event.workflow_run.name != 'Validate JSON for OpenCallShield' && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt == 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Esperando 1 hora antes de reintentar ${{ github.event.workflow_run.name }}..."
+          sleep 3600
+          gh api \
+            --method POST \
+            /repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/rerun
+
+      - name: Revertir commit inválido en main
+        if: github.event.workflow_run.name == 'Validate JSON for OpenCallShield' && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event != 'pull_request' && github.event.workflow_run.head_branch == 'main'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 2
+
+      - name: Crear commit de reversión
+        if: github.event.workflow_run.name == 'Validate JSON for OpenCallShield' && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event != 'pull_request' && github.event.workflow_run.head_branch == 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git revert --no-edit ${{ github.event.workflow_run.head_sha }}
+          git push
+          gh api /repos/${{ github.repository }}/dispatches \
+            -f event_type='validate-json' \
+            -F client_payload[source]='monitor_automation_revert'
+
+      - name: Notificar fallo de validación
+        if: github.event.workflow_run.name == 'Validate JSON for OpenCallShield' && github.event.workflow_run.conclusion == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ISSUE_TITLE="[Agente #5] Validación fallida en ${{ github.event.workflow_run.head_branch }} (${{ github.event.workflow_run.id }})"
+          existing_issue="$(gh issue list --state open --search "$ISSUE_TITLE in:title" --json number --jq '.[0].number')"
+          if [ -n "$existing_issue" ] && [ "$existing_issue" != "null" ]; then
+            echo "Ya existe el issue #$existing_issue"
+            exit 0
+          fi
+          cat <<'EOF' > /tmp/validation_failure_issue.md
+          Se requiere revisar la validación automática del archivo `mexico_spam_db.json`.
+
+          - Workflow: ${{ github.event.workflow_run.name }}
+          - Run: ${{ github.event.workflow_run.html_url }}
+          - Rama: `${{ github.event.workflow_run.head_branch }}`
+          - SHA: `${{ github.event.workflow_run.head_sha }}`
+          - Evento: `${{ github.event.workflow_run.event }}`
+
+          El agente de automatización detectó el fallo y, cuando aplica en `main`, intenta revertir el cambio automáticamente.
+          EOF
+
+          gh issue create \
+            --title "$ISSUE_TITLE" \
+            --body-file /tmp/validation_failure_issue.md
+
+      - name: Notificar fallo tras el reintento automático
+        if: github.event.workflow_run.name != 'Validate JSON for OpenCallShield' && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt > 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ISSUE_TITLE="[Agente #5] Workflow falló tras reintento: ${{ github.event.workflow_run.name }} (${{ github.event.workflow_run.id }})"
+          existing_issue="$(gh issue list --state open --search "$ISSUE_TITLE in:title" --json number --jq '.[0].number')"
+          if [ -n "$existing_issue" ] && [ "$existing_issue" != "null" ]; then
+            echo "Ya existe el issue #$existing_issue"
+            exit 0
+          fi
+          cat <<'EOF' > /tmp/retry_failure_issue.md
+          El workflow programado falló, se reintentó automáticamente 1 hora después y volvió a fallar.
+
+          - Workflow: ${{ github.event.workflow_run.name }}
+          - Run: ${{ github.event.workflow_run.html_url }}
+          - Rama: `${{ github.event.workflow_run.head_branch }}`
+          - SHA: `${{ github.event.workflow_run.head_sha }}`
+
+          Favor de revisar el agente de validación/orquestación (#5).
+          EOF
+
+          gh issue create \
+            --title "$ISSUE_TITLE" \
+            --body-file /tmp/retry_failure_issue.md
+
+  notify-pr-conflict:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notificar conflictos de PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mergeable_state="$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} --jq .mergeable_state)"
+          if [ "$mergeable_state" != "dirty" ]; then
+            echo "Sin conflictos de merge"
+            exit 0
+          fi
+
+          issue_title="[Automatización] PR con conflictos: #${{ github.event.pull_request.number }}"
+          existing_issue="$(gh issue list --state open --search "$issue_title in:title" --json number --jq '.[0].number')"
+          if [ -n "$existing_issue" ] && [ "$existing_issue" != "null" ]; then
+            echo "Ya existe el issue #$existing_issue"
+            exit 0
+          fi
+          cat <<'EOF' > /tmp/pr_conflict_issue.md
+          Se detectó un conflicto de merge en el PR #${{ github.event.pull_request.number }}.
+
+          - PR: ${{ github.event.pull_request.html_url }}
+          - Rama origen: `${{ github.event.pull_request.head.ref }}`
+          - Rama destino: `${{ github.event.pull_request.base.ref }}`
+
+          GitHub Notifications puede avisar al equipo; este issue deja además un rastro visible en el repositorio.
+          EOF
+
+          gh issue create \
+            --title "$issue_title" \
+            --body-file /tmp/pr_conflict_issue.md

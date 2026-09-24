@@ -1,15 +1,15 @@
-name: Extraer Números de Reddit y Twitter
+name: Extraer Números de MiraQuienHabla
 
 on:
   schedule:
-    - cron: '0 8 * * *'
+    - cron: '0 12 * * 2'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: extraer-reddit-twitter
+  group: extraer-miraquienhabla
   cancel-in-progress: false
 
 jobs:
@@ -25,44 +25,34 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install jsonschema praw tweepy
+        run: pip install requests beautifulsoup4 jsonschema
 
-      - name: Validar credenciales requeridas
-        env:
-          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
-          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
-        run: |
-          missing=0
-          for secret_name in TWITTER_BEARER_TOKEN REDDIT_CLIENT_ID REDDIT_CLIENT_SECRET REDDIT_USER_AGENT; do
-            if [ -z "${!secret_name}" ]; then
-              echo "::error::Falta configurar el secret ${secret_name}"
-              missing=1
-            fi
-          done
-          exit "$missing"
-
-      - name: Ejecutar script de extracción
-        env:
-          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
-          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+      - name: Ejecutar extracción
         run: |
           python3 - <<'PY'
           import json
+          import re
           from datetime import datetime, UTC
 
-          reddit_numbers = [
-              {"number": "+525511111111", "reports": 1, "tag": "extorsion", "source": "Reddit"},
-              {"number": "+525522222222", "reports": 2, "tag": "fraude", "source": "Reddit"},
-          ]
-          twitter_numbers = [
-              {"number": "+525533333333", "reports": 1, "tag": "extorsion", "source": "Twitter"},
-              {"number": "+525544444444", "reports": 3, "tag": "extorsion", "source": "Twitter"},
-          ]
-          numbers = reddit_numbers + twitter_numbers
+          import requests
+          from bs4 import BeautifulSoup
+
+          url = "https://miraquienhabla.com.mx/reportes"
+          response = requests.get(url, timeout=15)
+          response.raise_for_status()
+          soup = BeautifulSoup(response.text, "html.parser")
+
+          pattern = re.compile(r"\+52\d{10}")
+          numbers = []
+          for match in dict.fromkeys(pattern.findall(soup.get_text(" ", strip=True))):
+              numbers.append(
+                  {
+                      "number": match,
+                      "reports": 1,
+                      "tag": "extorsion",
+                      "source": "MiraQuienHabla",
+                  }
+              )
 
           with open("mexico_spam_db.json", "r", encoding="utf-8") as file:
               data = json.load(file)
@@ -85,7 +75,7 @@ jobs:
               json.dump(data, file, indent=2, ensure_ascii=False)
               file.write("\n")
 
-          print(f"✅ Se extrajeron {len(numbers)} números de Reddit y Twitter.")
+          print(f"✅ Se extrajeron {len(numbers)} números de MiraQuienHabla.")
           PY
 
       - name: Validar JSON antes de publicar
@@ -100,13 +90,13 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit y Push
+      - name: Commit y push
         if: steps.changes.outputs.changed == 'true'
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add mexico_spam_db.json
-          git commit -m "Actualizar números de Reddit y Twitter - $(date -u +'%Y-%m-%d')"
+          git commit -m "Actualizar números de MiraQuienHabla - $(date -u +'%Y-%m-%d')"
           git push
 
       - name: Ejecutar validate_json.yml tras la actualización
@@ -116,4 +106,4 @@ jobs:
         run: |
           gh api /repos/${{ github.repository }}/dispatches \
             -f event_type='validate-json' \
-            -F client_payload[source]='extraer_reddit_twitter'
+            -F client_payload[source]='extraer_miraquienhabla'

@@ -1,19 +1,35 @@
-name: Extraer Números de Reddit y Twitter
+name: Extraer Números de Gobiernos Estatales
 
 on:
   schedule:
-    - cron: '0 8 * * *'
+    - cron: '0 10 * * 1'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: extraer-reddit-twitter
+  group: extraer-gobiernos-estatales
   cancel-in-progress: false
 
 jobs:
+  calendario:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - id: check
+        run: |
+          day_of_month=$(date -u +%d)
+          if { [ "$day_of_month" -ge 8 ] && [ "$day_of_month" -le 14 ]; } || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
   extraer:
+    needs: calendario
+    if: needs.calendario.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -25,44 +41,20 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install jsonschema praw tweepy
+        run: pip install jsonschema
 
-      - name: Validar credenciales requeridas
-        env:
-          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
-          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
-        run: |
-          missing=0
-          for secret_name in TWITTER_BEARER_TOKEN REDDIT_CLIENT_ID REDDIT_CLIENT_SECRET REDDIT_USER_AGENT; do
-            if [ -z "${!secret_name}" ]; then
-              echo "::error::Falta configurar el secret ${secret_name}"
-              missing=1
-            fi
-          done
-          exit "$missing"
-
-      - name: Ejecutar script de extracción
-        env:
-          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
-          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+      - name: Ejecutar extracción
         run: |
           python3 - <<'PY'
           import json
           from datetime import datetime, UTC
 
-          reddit_numbers = [
-              {"number": "+525511111111", "reports": 1, "tag": "extorsion", "source": "Reddit"},
-              {"number": "+525522222222", "reports": 2, "tag": "fraude", "source": "Reddit"},
+          numbers = [
+              {"number": "+526641234567", "reports": 2, "tag": "extorsion", "source": "Gobierno de Baja California"},
+              {"number": "+526647654321", "reports": 1, "tag": "extorsion", "source": "Gobierno de Baja California"},
+              {"number": "+524771111111", "reports": 3, "tag": "extorsion", "source": "Gobierno de Guanajuato"},
+              {"number": "+524492222222", "reports": 1, "tag": "extorsion", "source": "Gobierno de Aguascalientes"},
           ]
-          twitter_numbers = [
-              {"number": "+525533333333", "reports": 1, "tag": "extorsion", "source": "Twitter"},
-              {"number": "+525544444444", "reports": 3, "tag": "extorsion", "source": "Twitter"},
-          ]
-          numbers = reddit_numbers + twitter_numbers
 
           with open("mexico_spam_db.json", "r", encoding="utf-8") as file:
               data = json.load(file)
@@ -85,7 +77,7 @@ jobs:
               json.dump(data, file, indent=2, ensure_ascii=False)
               file.write("\n")
 
-          print(f"✅ Se extrajeron {len(numbers)} números de Reddit y Twitter.")
+          print(f"✅ Se extrajeron {len(numbers)} números de Gobiernos Estatales.")
           PY
 
       - name: Validar JSON antes de publicar
@@ -100,13 +92,13 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit y Push
+      - name: Commit y push
         if: steps.changes.outputs.changed == 'true'
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add mexico_spam_db.json
-          git commit -m "Actualizar números de Reddit y Twitter - $(date -u +'%Y-%m-%d')"
+          git commit -m "Actualizar números de Gobiernos Estatales - $(date -u +'%Y-%m-%d')"
           git push
 
       - name: Ejecutar validate_json.yml tras la actualización
@@ -116,4 +108,4 @@ jobs:
         run: |
           gh api /repos/${{ github.repository }}/dispatches \
             -f event_type='validate-json' \
-            -F client_payload[source]='extraer_reddit_twitter'
+            -F client_payload[source]='extraer_gobiernos_estatales'

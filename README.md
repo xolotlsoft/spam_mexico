@@ -45,5 +45,35 @@ Si deseas contribuir con más números o mejorar la base de datos, puedes:
 
 ---
 
+## Automatización y monitoreo
+
+El repositorio cuenta con workflows en `.github/workflows/` para automatizar la actualización y validación de `mexico_spam_db.json`:
+
+- `extraer_miraquienhabla.yml`: ejecución semanal los martes a las 12:00 UTC.
+- `extraer_condusef_profeco.yml`: revisión semanal los lunes a las 10:00 UTC, con extracción solo el primer lunes de cada mes.
+- `extraer_reddit_twitter.yml`: ejecución diaria a las 08:00 UTC.
+- `extraer_gobiernos_estatales.yml`: revisión semanal los lunes a las 10:00 UTC, con extracción solo el segundo lunes de cada mes.
+- `validate_json.yml`: validación automática en pushes, pull requests y después de actualizaciones automáticas.
+- `monitor_automation.yml`: reintento automático una vez tras 1 hora en caso de fallo, creación de issues de seguimiento y notificación de conflictos en PRs.
+
+### Secrets requeridos
+
+Para `extraer_reddit_twitter.yml` deben configurarse estos GitHub Secrets antes de habilitar la automatización:
+
+- `TWITTER_BEARER_TOKEN`
+- `REDDIT_CLIENT_ID`
+- `REDDIT_CLIENT_SECRET`
+- `REDDIT_USER_AGENT`
+
+### Flujo de validación
+
+Cada workflow de extracción valida localmente el JSON antes de publicar cambios. Si hay cambios válidos, el workflow hace `push` y luego dispara `validate_json.yml` para verificar el estado final del repositorio. Si la validación falla en `main`, el workflow de monitoreo intenta revertir el commit fallido y abre un issue para el agente de validación/orquestación.
+
+### Notificaciones
+
+Las alertas operativas se registran vía GitHub Issues para fallos tras reintento y conflictos de PR. Además, el equipo puede usar las GitHub Notifications nativas del repositorio para seguir ejecuciones exitosas/fallidas de Actions.
+
+---
+
 ## Licencia
 Este proyecto se distribuye bajo los términos de **licencia abierta** para uso en herramientas de protección contra fraudes. Se recomienda verificar la validez de los datos antes de su implementación en sistemas críticos.

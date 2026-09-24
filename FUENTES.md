@@ -225,6 +225,32 @@ El archivo `mexico_spam_db.json` sigue el siguiente esquema:
 
 ---
 
+## 🤖 **Automatización**
+
+Los workflows de GitHub Actions asociados a estas fuentes viven en `.github/workflows/` y siguen esta programación:
+
+- `extraer_miraquienhabla.yml`: martes 12:00 UTC.
+- `extraer_condusef_profeco.yml`: primer lunes de cada mes, 10:00 UTC.
+- `extraer_reddit_twitter.yml`: diario, 08:00 UTC.
+- `extraer_gobiernos_estatales.yml`: segundo lunes de cada mes, 10:00 UTC.
+
+El workflow `monitor_automation.yml` supervisa estas ejecuciones, reintenta una vez después de 1 hora cuando un workflow falla y abre issues de seguimiento si el segundo intento también falla.
+
+### Secrets necesarios para Reddit/Twitter
+
+Las credenciales nunca deben guardarse en el repositorio. Para la automatización se deben definir en GitHub Secrets:
+
+- `TWITTER_BEARER_TOKEN`
+- `REDDIT_CLIENT_ID`
+- `REDDIT_CLIENT_SECRET`
+- `REDDIT_USER_AGENT`
+
+### Cambios de mantenimiento
+
+Si cambia la estructura de una fuente o rota alguna credencial, se debe actualizar el workflow correspondiente y este documento para mantener alineadas las dependencias operativas.
+
+---
+
 ## 🚀 **Contribuciones**
 
 Si encuentras una **nueva fuente confiable** o un **método de extracción mejorado**, puedes:

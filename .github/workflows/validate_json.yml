@@ -7,6 +7,12 @@ on:
   pull_request:
     paths:
       - 'mexico_spam_db.json'
+  repository_dispatch:
+    types:
+      - validate-json
+
+permissions:
+  contents: read
 
 jobs:
   validate-json:
@@ -24,44 +30,4 @@ jobs:
         run: pip install jsonschema
 
       - name: Validate JSON structure
-        run: |
-          python3 -c "
-          import json
-          from jsonschema import validate, ValidationError
-
-          # Schema esperado para OpenCallShield
-          schema = {
-              'type': 'object',
-              'properties': {
-                  'version': {'type': 'string'},
-                  'updated_at': {'type': 'string'},
-                  'description': {'type': 'string'},
-                  'numbers': {
-                      'type': 'array',
-                      'items': {
-                          'type': 'object',
-                          'properties': {
-                              'number': {'type': 'string', 'pattern': '^\+52\d{10}$'},
-                              'reports': {'type': 'integer', 'minimum': 1},
-                              'tag': {'type': 'string'},
-                              'source': {'type': 'string'}
-                          },
-                          'required': ['number', 'reports', 'tag', 'source']
-                      }
-                  }
-              },
-              'required': ['version', 'updated_at', 'description', 'numbers']
-          }
-
-          # Cargar el JSON
-          with open('mexico_spam_db.json', 'r') as f:
-              data = json.load(f)
-
-          # Validar contra el schema
-          try:
-              validate(instance=data, schema=schema)
-              print('✅ El JSON cumple con el formato esperado para OpenCallShield.')
-          except ValidationError as e:
-              print(f'❌ Error de validación: {e.message}')
-              exit(1)
-          "
+        run: python3 scripts/validate_json.py
