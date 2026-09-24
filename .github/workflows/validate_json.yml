@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - 'mexico_spam_db.json'
+      - 'scripts/extraer_gobiernos_estatales.py'
   pull_request:
     paths:
       - 'mexico_spam_db.json'
+      - 'scripts/extraer_gobiernos_estatales.py'
 
 jobs:
   validate-json:
@@ -25,11 +27,11 @@ jobs:
 
       - name: Validate JSON structure
         run: |
-          python3 -c "
+          python3 - <<'PY'
           import json
-          from jsonschema import validate, ValidationError
+          from collections import Counter
+          from jsonschema import ValidationError, validate
 
-          # Schema esperado para OpenCallShield
           schema = {
               'type': 'object',
               'properties': {
@@ -41,27 +43,28 @@ jobs:
                       'items': {
                           'type': 'object',
                           'properties': {
-                              'number': {'type': 'string', 'pattern': '^\+52\d{10}$'},
+                              'number': {'type': 'string', 'pattern': '^\\+52\\d{10}$'},
                               'reports': {'type': 'integer', 'minimum': 1},
-                              'tag': {'type': 'string'},
+                              'tag': {'type': 'string', 'enum': ['extorsion', 'fraude', 'spam']},
                               'source': {'type': 'string'}
                           },
-                          'required': ['number', 'reports', 'tag', 'source']
+                          'required': ['number', 'reports', 'tag', 'source'],
+                          'additionalProperties': False
                       }
                   }
               },
-              'required': ['version', 'updated_at', 'description', 'numbers']
+              'required': ['version', 'updated_at', 'description', 'numbers'],
+              'additionalProperties': False
           }
 
-          # Cargar el JSON
-          with open('mexico_spam_db.json', 'r') as f:
+          with open('mexico_spam_db.json', 'r', encoding='utf-8') as f:
               data = json.load(f)
 
-          # Validar contra el schema
-          try:
-              validate(instance=data, schema=schema)
-              print('✅ El JSON cumple con el formato esperado para OpenCallShield.')
-          except ValidationError as e:
-              print(f'❌ Error de validación: {e.message}')
-              exit(1)
-          "
+          validate(instance=data, schema=schema)
+          numbers = [item['number'] for item in data['numbers']]
+          duplicates = sorted(number for number, count in Counter(numbers).items() if count > 1)
+          if duplicates:
+              raise ValidationError(f'Números duplicados detectados: {", ".join(duplicates)}')
+
+          print('✅ El JSON cumple con el formato esperado para OpenCallShield y no contiene duplicados.')
+          PY

@@ -1,0 +1,47 @@
+name: Extraer Números de Gobiernos Estatales
+
+on:
+  schedule:
+    - cron: '0 15 * * 5'  # Viernes 15:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mexico-spam-db-extraction
+  cancel-in-progress: false
+
+jobs:
+  extraer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 jsonschema
+
+      - name: Ejecutar extracción de gobiernos estatales
+        run: |
+          python3 scripts/extraer_gobiernos_estatales.py \
+            --db-path mexico_spam_db.json \
+            --output-path mexico_spam_db.json
+
+      - name: Commit y Push
+        run: |
+          if git diff --quiet; then
+            echo "Sin cambios para publicar."
+            exit 0
+          fi
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add mexico_spam_db.json
+          git commit -m "Actualizar números de gobiernos estatales - $(date +'%Y-%m-%d')"
+          git push

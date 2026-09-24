@@ -1,57 +1,289 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "updated_at": "2026-09-24",
-  "description": "Base de datos colaborativa de números de extorsión telefónica en México. Fuentes: MiraQuienHabla, CONDUSEF, Profeco, y reportes públicos.",
+  "description": "Base de datos colaborativa de números de extorsión telefónica en México. Fuentes: MiraQuienHabla, CONDUSEF, Profeco, Gobiernos Estatales, Reddit, Twitter, y reportes públicos.",
   "numbers": [
-    {"number": "+525661965523", "reports": 4, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+528148564620", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+527203162336", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+527719140897", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+527719140815", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525657040049", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+526751095233", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525599642918", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525592031755", "reports": 3, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525588975629", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+527925195267", "reports": 4, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+526464783322", "reports": 4, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525634041148", "reports": 4, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+523339425400", "reports": 5, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525568054473", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+524472510688", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+523349587273", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+527298659433", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+524427166807", "reports": 3, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+523383113161", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525562069631", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+528994543782", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525513822449", "reports": 3, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+523375047484", "reports": 6, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525527459475", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+527206758550", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+526649691800", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+526699132837", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+528593893015", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525544028663", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525524977764", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525591141879", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525537678547", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525566329867", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525518294309", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525518456078", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525524222316", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525584453195", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+52559776782", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525546233023", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525566329867", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525589776782", "reports": 2, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525599928547", "reports": 11, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525599927070", "reports": 11, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525581141414", "reports": 112, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+52525668054473", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+524423341111", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525668054473", "reports": 1, "tag": "extorsion", "source": "MiraQuienHabla"},
-    {"number": "+525590715590", "reports": 3, "tag": "fraude", "source": "MiraQuienHabla"},
-    {"number": "+525530002900", "reports": 6, "tag": "extorsion", "source": "MiraQuienHabla"}
+    {
+      "number": "+525581141414",
+      "reports": 112,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525599927070",
+      "reports": 11,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525599928547",
+      "reports": 11,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+523375047484",
+      "reports": 6,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525530002900",
+      "reports": 6,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+523339425400",
+      "reports": 5,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525634041148",
+      "reports": 4,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525661965523",
+      "reports": 4,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+526464783322",
+      "reports": 4,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+527925195267",
+      "reports": 4,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+524427166807",
+      "reports": 3,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525513822449",
+      "reports": 3,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525590715590",
+      "reports": 3,
+      "tag": "fraude",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525592031755",
+      "reports": 3,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+523383113161",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525518294309",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525518456078",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525524222316",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525524977764",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525527459475",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525537678547",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525544028663",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525546233023",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525562069631",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525566329867",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525584453195",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525589776782",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525599642918",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+526649691800",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+526699132837",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+527206758550",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+528593893015",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+528994543782",
+      "reports": 2,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+523349587273",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+524423341111",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+524472510688",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525568054473",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525588975629",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525591141879",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525657040049",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+525668054473",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+526751095233",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+527203162336",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+527298659433",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+527719140815",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+527719140897",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    },
+    {
+      "number": "+528148564620",
+      "reports": 1,
+      "tag": "extorsion",
+      "source": "MiraQuienHabla"
+    }
   ]
 }

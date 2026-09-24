@@ -87,6 +87,17 @@ Este documento describe las **fuentes confiables** utilizadas para compilar la b
      - **Fuente oficial**: Dependencia de seguridad pública.
    - **Método de extracción**:
      - **Consulta manual**: Similar a Guanajuato, requiere ingresar números uno por uno.
+     - **Automatización compatible**: El script `scripts/extraer_gobiernos_estatales.py` acepta un archivo manual opcional para incorporar resultados validados sin hacer scraping masivo.
+
+---
+
+## 🤖 **Orquestación y Validación Automatizada**
+
+- **Workflow estatal**: `.github/workflows/extraer_gobiernos_estatales.yml` ejecuta la extracción semanal de fuentes estatales.
+- **Control de solapamiento**: Los workflows de extracción usan `concurrency: mexico-spam-db-extraction` para evitar escrituras concurrentes sobre `mexico_spam_db.json`.
+- **Priorización de conflictos**: Cuando un número aparece en múltiples fuentes, se conserva una sola entrada; la etiqueta final prioriza el mayor número de reportes y, en empate, la fuente más confiable (fuentes oficiales por encima de colaborativas).
+- **Fuentes con consulta manual**: Guanajuato y Aguascalientes se incorporan mediante archivos JSON manuales opcionales para respetar sus limitaciones de consulta individual.
+- **Manejo de fallos**: Si Baja California no responde o bloquea la solicitud, el script registra una advertencia en logs y continúa sin interrumpir la validación del resto de la base.
 
 ---
 
