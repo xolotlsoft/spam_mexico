@@ -64,23 +64,10 @@ EXCLUIR_PREFIJOS = ("800", "900")
 
 # ---------------------------------------------------------------- Utilidades
 
-def get(url: str):
-    """GET con reintentos: si falla la verificación SSL (cadena incompleta
-    común en sitios de gobierno mexicanos), reintenta una vez con
-    verify=False y emite una advertencia. Solo para fuentes públicas."""
-    try:
-        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
-    except requests.exceptions.SSLError:
-        print(f"  ⚠️ SSL no verificable para {url}; reintentando sin verificación de certificado.")
-        import urllib3
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT, verify=False)
-    r.raise_for_status()
-    return r
-
-
 def fetch(url: str) -> str:
-    return get(url).text
+    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    return r.text
 
 
 def html_a_texto(html: str) -> str:
@@ -133,8 +120,7 @@ def fuente_bc():
 
 URLS_CONDUSEF = [
     "https://www.condusef.gob.mx/?p=contenido&idc=2828&idcat=1",
-    "https://www.condusef.gob.mx/documentos/pren
-sa/",
+    "https://www.condusef.gob.mx/documentos/prensa/",
 ]
 
 def _pdfs_en(html: str, base_url: str):
@@ -143,7 +129,8 @@ def _pdfs_en(html: str, base_url: str):
     return [urljoin(base_url, h) for h in enlaces]
 
 def _texto_de_pdf(url: str) -> str:
-    r = get(url)
+    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
     from PyPDF2 import PdfReader
     lector = PdfReader(io.BytesIO(r.content))
     return "\n".join((p.extract_text() or "") for p in lector.pages)
