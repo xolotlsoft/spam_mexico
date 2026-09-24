@@ -54,7 +54,8 @@ El repositorio cuenta con workflows en `.github/workflows/` para automatizar la 
 - `extraer_reddit_twitter.yml`: ejecución diaria a las 08:00 UTC.
 - `extraer_gobiernos_estatales.yml`: revisión semanal los lunes a las 10:00 UTC, con extracción solo el segundo lunes de cada mes.
 - `validate_json.yml`: validación automática en pushes, pull requests y después de actualizaciones automáticas.
-- `monitor_automation.yml`: reintento automático una vez tras 1 hora en caso de fallo, creación de issues de seguimiento y notificación de conflictos en PRs.
+- `monitor_automation.yml`: reintento automático una vez tras 1 hora en caso de fallo y creación de issues de seguimiento.
+- `notify_pr_conflicts.yml`: notificación por issue cuando un Pull Request entra en estado de conflicto.
 
 ### Secrets requeridos
 

@@ -10,21 +10,14 @@ on:
       - Validate JSON for OpenCallShield
     types:
       - completed
-  pull_request_target:
-    types:
-      - opened
-      - reopened
-      - synchronize
 
 permissions:
   actions: write
   contents: write
   issues: write
-  pull-requests: read
 
 jobs:
   retry-or-notify:
-    if: github.event_name == 'workflow_run'
     runs-on: ubuntu-latest
     steps:
       - name: Reintentar el workflow una vez después de 1 hora
@@ -42,7 +35,7 @@ jobs:
         if: github.event.workflow_run.name == 'Validate JSON for OpenCallShield' && github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event != 'pull_request' && github.event.workflow_run.head_branch == 'main'
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: main
           fetch-depth: 2
 
       - name: Crear commit de reversión
@@ -63,7 +56,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          ISSUE_TITLE="[Agente #5] Validación fallida en ${{ github.event.workflow_run.head_branch }} (${{ github.event.workflow_run.id }})"
+          ISSUE_TITLE="[Agente #5] Validación fallida (${{ github.event.workflow_run.id }})"
           existing_issue="$(gh issue list --state open --search "$ISSUE_TITLE in:title" --json number --jq '.[0].number')"
           if [ -n "$existing_issue" ] && [ "$existing_issue" != "null" ]; then
             echo "Ya existe el issue #$existing_issue"
@@ -74,7 +67,6 @@ jobs:
 
           - Workflow: ${{ github.event.workflow_run.name }}
           - Run: ${{ github.event.workflow_run.html_url }}
-          - Rama: `${{ github.event.workflow_run.head_branch }}`
           - SHA: `${{ github.event.workflow_run.head_sha }}`
           - Evento: `${{ github.event.workflow_run.event }}`
 
@@ -101,7 +93,6 @@ jobs:
 
           - Workflow: ${{ github.event.workflow_run.name }}
           - Run: ${{ github.event.workflow_run.html_url }}
-          - Rama: `${{ github.event.workflow_run.head_branch }}`
           - SHA: `${{ github.event.workflow_run.head_sha }}`
 
           Favor de revisar el agente de validación/orquestación (#5).
@@ -110,37 +101,3 @@ jobs:
           gh issue create \
             --title "$ISSUE_TITLE" \
             --body-file /tmp/retry_failure_issue.md
-
-  notify-pr-conflict:
-    if: github.event_name == 'pull_request_target'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notificar conflictos de PR
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          mergeable_state="$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} --jq .mergeable_state)"
-          if [ "$mergeable_state" != "dirty" ]; then
-            echo "Sin conflictos de merge"
-            exit 0
-          fi
-
-          issue_title="[Automatización] PR con conflictos: #${{ github.event.pull_request.number }}"
-          existing_issue="$(gh issue list --state open --search "$issue_title in:title" --json number --jq '.[0].number')"
-          if [ -n "$existing_issue" ] && [ "$existing_issue" != "null" ]; then
-            echo "Ya existe el issue #$existing_issue"
-            exit 0
-          fi
-          cat <<'EOF' > /tmp/pr_conflict_issue.md
-          Se detectó un conflicto de merge en el PR #${{ github.event.pull_request.number }}.
-
-          - PR: ${{ github.event.pull_request.html_url }}
-          - Rama origen: `${{ github.event.pull_request.head.ref }}`
-          - Rama destino: `${{ github.event.pull_request.base.ref }}`
-
-          GitHub Notifications puede avisar al equipo; este issue deja además un rastro visible en el repositorio.
-          EOF
-
-          gh issue create \
-            --title "$issue_title" \
-            --body-file /tmp/pr_conflict_issue.md
