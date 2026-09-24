@@ -234,3 +234,12 @@ Si encuentras una **nueva fuente confiable** o un **método de extracción mejor
 ---
 
 **Nota**: Este documento se actualizará periódicamente para incluir nuevas fuentes o métodos de extracción.
+
+## Registro automatizado CONDUSEF y Profeco
+<!-- condusef-profeco-log:start -->
+### 2026-09-24 - CONDUSEF y Profeco
+- Números añadidos: ninguno
+- Incidencias:
+  - CONDUSEF: no fue posible acceder a https://www.condusef.gob.mx/?p=contenido&idc=2828&idcat=1
+  - Profeco: no fue posible acceder a https://repep.profeco.gob.mx/Denunciar.jsp
+<!-- condusef-profeco-log:end -->

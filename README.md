@@ -26,6 +26,7 @@ Para utilizar esta base de datos en **OpenCallShield**, sigue estos pasos:
 
 3. **Actualización de Datos**:
    - Si deseas actualizar los datos, puedes hacer un *Pull Request* con los cambios o reportar números adicionales a través de las fuentes mencionadas.
+   - El flujo programado `extraer_condusef_profeco.yml` ejecuta `scripts/extract_condusef_profeco.py` para intentar incorporar reportes oficiales de CONDUSEF y Profeco.
 
 ---
 

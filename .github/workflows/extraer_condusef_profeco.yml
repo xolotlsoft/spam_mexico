@@ -1,0 +1,33 @@
+name: Extraer Números de CONDUSEF y Profeco
+
+on:
+  schedule:
+    - cron: '0 12 * * 2'
+  workflow_dispatch:
+
+jobs:
+  extraer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4 PyPDF2 jsonschema
+
+      - name: Ejecutar script de extracción
+        run: python3 scripts/extract_condusef_profeco.py
+
+      - name: Commit y Push
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add mexico_spam_db.json FUENTES.md
+          git diff --cached --quiet && exit 0
+          git commit -m "Actualizar números de CONDUSEF y Profeco - $(date +'%Y-%m-%d')"
+          git push
