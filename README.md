@@ -27,6 +27,17 @@ Para utilizar esta base de datos en **OpenCallShield**, sigue estos pasos:
 3. **Actualización de Datos**:
    - Si deseas actualizar los datos, puedes hacer un *Pull Request* con los cambios o reportar números adicionales a través de las fuentes mencionadas.
 
+### Workflows automatizados
+
+**Activos**:
+- `validate_json.yml`: valida `mexico_spam_db.json` contra el schema de OpenCallShield en cada push/PR a `main`.
+- `extraer_miraquienhabla.yml`: scraping semanal de [MiraQuienHabla](https://miraquienhabla.com.mx/reportes) (martes 12:00 UTC).
+- `extraer_alertas_oficiales.yml`: extracción **diaria** (08:00 UTC) de alertas oficiales de CONDUSEF, Profeco, SSPC y Seguridad BC mediante `scripts/extraer_alertas_oficiales.py`, con filtros anti-falsos-positivos y commit automático solo si hay números nuevos.
+
+**Deshabilitados** (no-op, sin cron):
+- `extraer_reddit_twitter.yml`: **Reddit y Twitter/X no son soportados** por las políticas de sus APIs (Reddit exige aprobación previa bajo su Responsible Builder Policy; X requiere un plan de pago). Ver `FUENTES.md` para más detalles.
+- `extraer_condusef_profeco.yml` y `extraer_gobiernos_estatales.yml`: sustituidos por `extraer_alertas_oficiales.yml` (usaban datos simulados).
+
 ---
 
 ## Estructura del Archivo
@@ -41,7 +52,7 @@ El archivo `mexico_spam_db.json` contiene una lista de números telefónicos con
 ## Contribuciones
 Si deseas contribuir con más números o mejorar la base de datos, puedes:
 1. Abrir un *Pull Request* con los cambios.
-2. Reportar números adicionales a través de las fuentes mencionadas.
+2. Reportar números adicionales a través de las fuentes mencionadas en [FUENTES.md](FUENTES.md).
 
 ---
 
