@@ -56,17 +56,31 @@ KEYWORDS = re.compile(
 )
 
 # Secuencia de dígitos con separadores opcionales (espacios, guiones, puntos).
-CANDIDATO_RE = re.compile(r"\+?\d[\d\s\-.()]{7,16}\d")
+CANDIDATO_RE = re.compile(r"\+?\d[\d\s\-.()]{7,16}\d"
+)
 
 # Prefijos nacionales que NUNCA se marcan como spam (líneas oficiales).
 EXCLUIR_PREFIJOS = ("800", "900")
 
 # ---------------------------------------------------------------- Utilidades
 
-def fetch(url: str) -> str:
-    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+def get(url: str):
+    """GET con reintentos: si falla la verificación SSL (cadena incompleta
+    común en sitios de gobierno mexicanos), reintenta una vez con
+    verify=False y emite una advertencia. Solo para fuentes públicas."""
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+    except requests.exceptions.SSLError:
+        print(f"  ⚠️ SSL no verificable para {url}; reintentando sin verificación de certificado.")
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT, verify=False)
     r.raise_for_status()
-    return r.text
+    return r
+
+
+def fetch(url: str) -> str:
+    return get(url).text
 
 
 def html_a_texto(html: str) -> str:
@@ -119,7 +133,8 @@ def fuente_bc():
 
 URLS_CONDUSEF = [
     "https://www.condusef.gob.mx/?p=contenido&idc=2828&idcat=1",
-    "https://www.condusef.gob.mx/documentos/prensa/",
+    "https://www.condusef.gob.mx/documentos/pren
+sa/",
 ]
 
 def _pdfs_en(html: str, base_url: str):
@@ -128,8 +143,7 @@ def _pdfs_en(html: str, base_url: str):
     return [urljoin(base_url, h) for h in enlaces]
 
 def _texto_de_pdf(url: str) -> str:
-    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
-    r.raise_for_status()
+    r = get(url)
     from PyPDF2 import PdfReader
     lector = PdfReader(io.BytesIO(r.content))
     return "\n".join((p.extract_text() or "") for p in lector.pages)
@@ -178,7 +192,8 @@ SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "number": {"type": "string", "pattern": r"^\+52\d{10}$"},
+                    "number": {"type": "string", "pattern": r
+"^\+52\d{10}$"},
                     "reports": {"type": "integer", "minimum": 1},
                     "tag": {"type": "string"},
                     "source": {"type": "string"},
@@ -243,7 +258,8 @@ def main():
     ]
 
     if por_agregar:
-        data["numbers"].extend(por_agregar)
+      
+  data["numbers"].extend(por_agregar)
         try:
             version = float(data.get("version", "1.0"))
         except (TypeError, ValueError):
