@@ -1,128 +1,32 @@
-name: Extraer Números de Gobiernos Estatales
+# ⚠️ DESHABILITADO — SUSTITUIDO POR extraer_alertas_oficiales.yml
+#
+# Motivo:
+#  1. Este workflow usaba datos SIMULADOS (números inventados de BC,
+#     Guanajuato y Aguascalientes) y su cron los habría agregado a
+#     mexico_spam_db.json, contaminando la base de datos.
+#  2. La extracción real de fuentes estatales/oficiales se realiza con
+#     scripts/extraer_alertas_oficiales.py, ejecutado DIARIAMENTE por
+#     extraer_alertas_oficiales.yml. Baja California (seguridadbc.gob.mx)
+#     ya está cubierta por ese pipeline.
+#  3. Los portales de Guanajuato (C5i) y Aguascalientes (C5i) no exponen
+#     listas estructuradas de números; requieren consulta manual.
+
+name: 'DESHABILITADO - Extraer Números de Gobiernos Estatales'
 
 on:
-  schedule:
-    - cron: '0 10 * * 2'  # Ejecutar el segundo lunes de cada mes a las 10:00 UTC
-  workflow_dispatch:  # Permitir ejecución manual
+  workflow_dispatch:  # Solo ejecución manual, sin programación
 
 jobs:
-  extraer:
+  no-op:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: workflows/agentes
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
+      - name: Explicar estado
         run: |
-          pip install requests beautifulsoup4
-
-      - name: Ejecutar script de extracción
-        run: |
-          python3 -c "
-          import requests
-          from bs4 import BeautifulSoup
-          import json
-          from datetime import datetime
-          import re
-
-          # Simulación de extracción desde portales de gobiernos estatales
-          # Ejemplo: Baja California (https://seguridadbc.gob.mx/ExtorsionTelefonica)
-          
-          # Números simulados de Baja California
-          numeros_bc = [
-              {'number': '+526641234567', 'reports': 2, 'tag': 'extorsion', 'source': 'Gobierno de Baja California'},
-              {'number': '+526647654321', 'reports': 1, 'tag': 'extorsion', 'source': 'Gobierno de Baja California'}
-          ]
-          
-          # Números simulados de Guanajuato
-          numeros_guanajuato = [
-              {'number': '+524771111111', 'reports': 3, 'tag': 'extorsion', 'source': 'Gobierno de Guanajuato'}
-          ]
-          
-          # Números simulados de Aguascalientes
-          numeros_aguascalientes = [
-              {'number': '+524492222222', 'reports': 1, 'tag': 'extorsion', 'source': 'Gobierno de Aguascalientes'}
-          ]
-          
-          # Combinar números
-          numeros = numeros_bc + numeros_guanajuato + numeros_aguascalientes
-          
-          # Cargar el JSON actual
-          with open('mexico_spam_db.json', 'r') as f:
-              data = json.load(f)
-          
-          # Agregar nuevos números (evitar duplicados)
-          existing_numbers = {num['number'] for num in data['numbers']}
-          for num in numeros:
-              if num['number'] not in existing_numbers:
-                  data['numbers'].append(num)
-          
-          # Actualizar metadatos
-          data['updated_at'] = datetime.now().strftime('%Y-%m-%d')
-          data['version'] = '1.2'
-          data['description'] = 'Base de datos colaborativa de números de extorsión telefónica en México. Fuentes: MiraQuienHabla, CONDUSEF, Profeco, Reddit, Twitter, y Gobiernos Estatales.'
-          
-          # Guardar el JSON actualizado
-          with open('mexico_spam_db.json', 'w') as f:
-              json.dump(data, f, indent=2, ensure_ascii=False)
-          
-          print(f'✅ Se extrajeron {len(numeros)} números de Gobiernos Estatales.')
-          "
-
-      - name: Validar JSON
-        run: |
-          python3 -c "
-          import json
-          from jsonschema import validate, ValidationError
-
-          # Schema esperado para OpenCallShield
-          schema = {
-              'type': 'object',
-              'properties': {
-                  'version': {'type': 'string'},
-                  'updated_at': {'type': 'string'},
-                  'description': {'type': 'string'},
-                  'numbers': {
-                      'type': 'array',
-                      'items': {
-                          'type': 'object',
-                          'properties': {
-                              'number': {'type': 'string', 'pattern': '^\+52\d{10}$'},
-                              'reports': {'type': 'integer', 'minimum': 1},
-                              'tag': {'type': 'string'},
-                              'source': {'type': 'string'}
-                          },
-                          'required': ['number', 'reports', 'tag', 'source']
-                      }
-                  }
-              },
-              'required': ['version', 'updated_at', 'description', 'numbers']
-          }
-
-          # Cargar el JSON
-          with open('mexico_spam_db.json', 'r') as f:
-              data = json.load(f)
-
-          # Validar contra el schema
-          try:
-              validate(instance=data, schema=schema)
-              print('✅ El JSON cumple con el formato esperado para OpenCallShield.')
-          except ValidationError as e:
-              print(f'❌ Error de validación: {e.message}')
-              exit(1)
-          "
-
-      - name: Commit y Push
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add mexico_spam_db.json
-          git commit -m "Actualizar números de Gobiernos Estatales - $(date +'%Y-%m-%d')"
-          git push
+          echo "⚠️ Este workflow fue deshabilitado."
+          echo ""
+          echo "La extracción real de alertas oficiales (incluyendo Baja California)"
+          echo "se ejecuta diariamente en 'Extraer Números de Alertas Oficiales'"
+          echo "(extraer_alertas_oficiales.yml), usando scripts/extraer_alertas_oficiales.py."
+          echo ""
+          echo "Guanajuato y Aguascalientes requieren consulta manual (ver FUENTES.md)."
+          exit 0
