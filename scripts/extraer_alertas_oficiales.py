@@ -238,10 +238,8 @@ def main():
     existentes = {e["number"] for e in data.get("numbers", [])}
     por_agregar = [
         {"number": n, "reports": 1, "tag": "extorsion", "source": f}
-        for n, f in sorted(nuegos.items()) if n not in existentes
-    ] if False else [
-        {"number": n, "reports": 1, "tag": "extorsion", "source": f}
-        for n, f in sorted(nuevos.items()) if n not in existentes
+        for n, f in sorted(nuevos.items())
+        if n not in existentes
     ]
 
     if por_agregar:
