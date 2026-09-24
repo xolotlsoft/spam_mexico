@@ -1,0 +1,135 @@
+name: Extraer Números de MiraQuienHabla
+
+on:
+  schedule:
+    - cron: '0 12 * * 2'  # Ejecutar todos los martes a las 12:00 UTC
+  workflow_dispatch:  # Permitir ejecución manual
+
+jobs:
+  extraer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: workflows/agentes
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 jsonschema
+
+      - name: Ejecutar script de extracción
+        run: |
+          python3 -c "
+          import requests
+          from bs4 import BeautifulSoup
+          import json
+          import re
+          from datetime import datetime
+
+          # URL de MiraQuienHabla
+          url = 'https://miraquienhabla.com.mx/reportes'
+          
+          try:
+              # Obtener la página
+              response = requests.get(url, timeout=10)
+              response.raise_for_status()
+              soup = BeautifulSoup(response.text, 'html.parser')
+              
+              # Extraer números y detalles (ejemplo: buscar patrones de números en el texto)
+              # Nota: Este es un ejemplo genérico. El script real debe adaptarse a la estructura HTML de la página.
+              numeros = []
+              
+              # Buscar todos los números en formato +52XXXXXXXXXX
+              phone_pattern = re.compile(r'\+52\d{10}')
+              for match in phone_pattern.finditer(response.text):
+                  number = match.group()
+                  # Simular reportes y fuente (en un script real, esto se extraería del HTML)
+                  numeros.append({
+                      'number': number,
+                      'reports': 1,  # Valor por defecto, en la realidad se extrae del sitio
+                      'tag': 'extorsion',
+                      'source': 'MiraQuienHabla'
+                  })
+              
+              # Cargar el JSON actual
+              with open('mexico_spam_db.json', 'r') as f:
+                  data = json.load(f)
+              
+              # Agregar nuevos números (evitar duplicados)
+              existing_numbers = {num['number'] for num in data['numbers']}
+              for num in numeros:
+                  if num['number'] not in existing_numbers:
+                      data['numbers'].append(num)
+              
+              # Actualizar metadatos
+              data['updated_at'] = datetime.now().strftime('%Y-%m-%d')
+              data['version'] = '1.2'
+              data['description'] = 'Base de datos colaborativa de números de extorsión telefónica en México. Fuentes: MiraQuienHabla, CONDUSEF, Profeco, y reportes públicos.'
+              
+              # Guardar el JSON actualizado
+              with open('mexico_spam_db.json', 'w') as f:
+                  json.dump(data, f, indent=2, ensure_ascii=False)
+              
+              print(f'✅ Se extrajeron {len(numeros)} números de MiraQuienHabla.')
+              
+          except Exception as e:
+              print(f'❌ Error al extraer datos: {e}')
+              exit(1)
+          "
+
+      - name: Validar JSON
+        run: |
+          python3 -c "
+          import json
+          from jsonschema import validate, ValidationError
+
+          # Schema esperado para OpenCallShield
+          schema = {
+              'type': 'object',
+              'properties': {
+                  'version': {'type': 'string'},
+                  'updated_at': {'type': 'string'},
+                  'description': {'type': 'string'},
+                  'numbers': {
+                      'type': 'array',
+                      'items': {
+                          'type': 'object',
+                          'properties': {
+                              'number': {'type': 'string', 'pattern': '^\+52\d{10}$'},
+                              'reports': {'type': 'integer', 'minimum': 1},
+                              'tag': {'type': 'string'},
+                              'source': {'type': 'string'}
+                          },
+                          'required': ['number', 'reports', 'tag', 'source']
+                      }
+                  }
+              },
+              'required': ['version', 'updated_at', 'description', 'numbers']
+          }
+
+          # Cargar el JSON
+          with open('mexico_spam_db.json', 'r') as f:
+              data = json.load(f)
+
+          # Validar contra el schema
+          try:
+              validate(instance=data, schema=schema)
+              print('✅ El JSON cumple con el formato esperado para OpenCallShield.')
+          except ValidationError as e:
+              print(f'❌ Error de validación: {e.message}')
+              exit(1)
+          "
+
+      - name: Commit y Push
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add mexico_spam_db.json
+          git commit -m "Actualizar números de MiraQuienHabla - $(date +'%Y-%m-%d')"
+          git push
