@@ -104,6 +104,7 @@ Este documento describe las **fuentes confiables** utilizadas para compilar la b
        reddit = praw.Reddit(client_id='...', client_secret='...', user_agent='...')
        submissions = reddit.subreddit('mexico').search('extorsión telefónica', limit=100)
        ```
+     - **Automatización en el repositorio**: El script `scripts/extraer_reddit_twitter.py` consulta Reddit, filtra publicaciones con más de 5 upvotes y fusiona números nuevos sin duplicados en `mexico_spam_db.json`.
 
 ---
 
@@ -121,6 +122,7 @@ Este documento describe las **fuentes confiables** utilizadas para compilar la b
        client = tweepy.Client(bearer_token='...')
        tweets = client.search_recent_tweets(query='#ExtorsiónTelefónica', max_results=100)
        ```
+     - **Automatización en el repositorio**: El script `scripts/extraer_reddit_twitter.py` consulta hashtags relevantes, filtra tuits con más de 10 likes, valida el JSON final y agrega un registro de extracción en `FUENTES.md` cuando se incorporan números nuevos.
 
 ---
 
